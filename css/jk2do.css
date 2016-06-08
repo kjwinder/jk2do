@@ -1,0 +1,102 @@
+body {
+	/*width: 380px;*/
+	background: #F2F2F2;
+	/*max-width:720px;
+	overflow:auto;
+	max-height:800px;*/
+}
+
+.rnd {
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	border-radius:5px;
+}
+
+.jkPage {
+	/*max-height:745px;
+	overflow:hidden;
+	border-bottom: 2px black solid;
+	margin:0px auto;
+	width:98%;
+	*/
+}
+
+.jkSection {
+	/*padding:3px 3px;
+	border:1px green solid;
+	margin:3px 3px;*/
+}
+
+.jk2doItem {
+	border:1px blue solid;
+	margin:3px 3px;
+	padding:2px 2px;
+}
+
+.jk2doContent {
+	border:1px red solid;
+	padding:2px 2px;
+	margin:0px 2px;
+}
+
+.jk2doRemove {
+	border:1px red solid;
+	margin:0px 10px;
+	padding:1px 3px 0px 3px;
+}
+
+.jk2doEdit {
+	border:1px blue solid;
+	margin:0px 3px;
+}
+
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; } /* Angular-UI to Bootstrap.css compatibility */
+
+.tabGroup {
+
+}
+
+.tabGroupTabs {
+	border:2px black solid;
+	padding:3px 5px;
+	margin:3px auto;
+	min-height:42px;
+	background:#F9F9F9;
+}
+
+.tabGroupTab {
+	float:left;
+	max-width:100px;
+	padding:3px 3px 5px 3px;;
+	list-style-type:none;
+	border:1px blue solid;
+	text-align:center;
+	margin:1px 2px;
+	display:inline-block;
+	cursor:pointer;
+}
+
+.tabPane {
+	/*border:1px orange dashed;*/
+}
+
+.tabContent {
+	/*max-height:695px;
+	overflow:auto;*/
+	width:95%;
+	margin:0px auto;
+	height:100%;
+}
+
+.bottomPanel {
+	border-top:2px blue solid;
+	position:fixed;bottom:0px;left:-2px;
+	margin:2px 2px 0px 2px;
+	padding:3px 3px;
+	max-height:60px;
+	min-height:60px;
+	min-width:300px;
+	width:100%;
+	z-index:9999;
+	background:#FFF;
+}

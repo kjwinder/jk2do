@@ -1,0 +1,15 @@
+<div class="tabGroup">
+	<!-- <a ng-click="showAll()">All</a> -->
+	<div class="tabGroupTabs">
+		<!-- <ul style="width:auto;margin:2px auto;">
+			<!-!- <li class="tabGroupTab rnd" style="width:50px;padding-left:0px;">
+				<a href="" ng-click="showAll()">All</a>
+			</li> -!->
+			<li ng-repeat="pane in panes" class="tabGroupTab rnd">
+				<a href="" ng-click="select(pane)">{{pane.title}}</a>
+			</li>
+		</ul> -->
+		<button class="btn btn-sm text-center pull-left" style="margin:2px 4px; background:#CCC;" ng-repeat="pane in panes" ng-click="select(pane)">{{pane.title}}</button>
+	</div>
+	<div class="tabContent" ng-transclude></div>
+</div>

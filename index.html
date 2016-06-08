@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html ng-app="jk2do">
+<head>
+	<title>JK2Do</title>
+	<link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/jk2do.css">
+</head>
+<body ng-controller="jk2doCtrl">
+	<div class="container-fluid jkPage">
+		<tab-group>
+			<tab-pane title="Tasks">
+				<div class="jkSection rnd" id="jk2doList">
+					<div class="row">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<div class="pull-right">
+								New:<input type="checkbox" ng-model="addingNewTask">
+							</div>
+							<h5>Tasks: ({{jk2doList.length}} found, {{(jk2doList | filter: {completed:false}).length}} incomplete)</h5>
+						</div>
+					</div>
+					<div class="row rnd" ng-show="addingNewTask">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<h5>New Task:</h5>
+							<div class="row">
+								<div class="col-md-12 col-sm-12 col-xs-12">
+									<form role="form">
+										<div class="form-group">
+											<input type="text" id="new2do" ng-model="new2do.content" class="form-control" placeholder="<poof!>  What needs doing?">
+										</div>
+										<div class="form-group row">
+											<div class="col-md-2 col-sm-2 col-xs-2">
+												<label class="text-right" for="ctg">Category:</label>
+											</div>
+											<div class="col-md-10 col-sm-10 col-xs-10">
+												<select class="form-control pull-left" ng-options="category.id as category.name for category in jk2doCategories" ng-model="new2do.category_id"></select>
+											</div>
+										</div>
+										<div class="form-group row">
+											<div class="col-md-2 col-sm-2 col-xs-2">
+												<label for="project">Project:</label>
+											</div>
+											<div class="col-md-10 col-sm-10 col-xs-10">
+												<select class="form-control" ng-model="new2do.project_id" ng-options="project.id as project.name for project in jk2doProjects">
+													<option value="" selected>:Projects:</option>
+												</select>
+											</div>
+										</div>
+										<div class="checkbox row">
+											<div class="col-md-12 col-sm-12 col-xs-12">
+												<label for="isRcTsk"><input type="checkbox" ng-model="new2do.isRecurringTask"> isRecurringTask</label>
+											</div>
+										</div>
+										<div class="form-group row" ng-show="new2do.isRecurringTask">
+											<div class="col-md-2 col-sm-2 col-xs-2">
+												<label>RecurrenceType:</label>
+											</div>
+											<div class="col-md-10 col-sm-10 col-xs-10">
+												<select ng-model="new2do.recurrenceType" class="form-control" ng-options="rType.id as rType.name for rType in recurrenceTypes"></select>
+											</div>
+										</div>
+										<div class="checkbox row">
+											<div class="col-md-12 col-sm-12 col-xs-12">
+												<label><input type="checkbox" ng-model="new2doHasAlarm">Alarm</label>
+											</div>
+										</div>
+										<div ng-show="new2doHasAlarm">
+											<div class="form-group">
+												<input type="text" class="form-control" id="newAlarmName" ng-model="newAlarm.name" placeholder="Alarm Name (uq)">
+											</div>
+											<div class="form-group">
+												<label for="dim">DelayInMin:</label><input type="number" id="newAlarmDelayInMinutes" ng-model="newAlarm.delayInMinutes">
+												<!-- PeriodInMin: <input type="number" id="newAlarmPeriodInMinutes" class="form-control" ng-model="newAlarm.periodInMinutes"> -->
+											</div>
+										</div>
+										<a id="jk2doAdd" ng-click="addTodo()" class="btn btn-sm btn-default pull-right">
+											<i class="glyphicon glyphicon-add"></i>Add
+										</a>
+									</form>
+									<hr>
+								</div>
+							</div>
+						</div>
+						<!-- <div style="clear:both;"></div> -->
+					</div>
+					<div class="row jk2doItem rnd" ng-repeat="todo in jk2doList track by todo.id">
+						<!--  | orderBy: createdAt -->
+						<div class="pull-right">
+							<div class="pull-right">
+								<a class="jk2doRemove btn btn-sm btn-danger pull-right rnd" ng-click="removeTodo(todo)"><i class="glyphicon glyphicon-remove"></i></a>
+							</div>
+							<div class="jk2doEdit rnd pull-right">
+								<div style="position:relative;width:100%;height:100%;">
+									<i class="glyphicon glyphicon-edit"></i>
+									<input type="checkbox" ng-model="todo._jkCfg.editable">
+								</div>
+							</div>
+							<div style="clear:both;"></div>
+						</div>
+						<div ng-show="!todo._jkCfg.editable">
+							<input type="checkbox" ng-model="todo.completed" ng-click="toggleCompleted()">
+							<span class="jk2doContent">{{todo.content}}</span>
+							<span ng-show="todo.category_id">[{{jk2doCategories[ref.categories[todo.category_id]].shorthand}}]</span>
+							<span ng-show="todo.project_id">{{jk2doProjects[ref.projects[todo.project_id]].name}}</span>
+							<span ng-show="todo.isRecurringTask">
+								<i class="glyphicon glyphicon-repeat"></i>
+							</span>
+						</div>
+						<div ng-show="todo._jkCfg.editable">
+							<input type="text" ng-model="todo.content"><br>
+							Cat: <select ng-model="todo.category_id" ng-options="category.id as category.name for category in jk2doCategories"></select><br>
+							Proj: <select ng-model="todo.project_id" ng-options="project.id as project.name for project in jk2doProjects"></select><br>
+							isRecurringTask: <input type="checkbox" ng-model="todo.isRecurringTask"><br>
+							<div ng-show="todo.isRecurringTask">
+								RecurrenceType: <select ng-model="todo.recurrenceType" ng-options="rType.id as rType.name for rType in recurrenceTypes"></select>
+								<div ng-show="todo.recurrenceType == 1">
+									None
+								</div>
+								<div ng-show="todo.recurrenceType == 2">
+									Schedule
+								</div>
+								<div ng-show="todo.recurrenceType == 3">
+									Range
+								</div>
+								<div ng-show="todo.recurrenceType == 4">
+									Any
+								</div>
+							</div>
+							Alarm: {{todo.alarmName}}<br>
+							hasCompletionTime:<input type="checkbox" ng-model="todo.hasCompletionTime"><br>
+							<div ng-show="todo.hasCompletionTime">
+								minCompletionTime <input type="text" ng-model="todo.minCompletionTime" size="4">
+								<select ng-model="todo.minCompletionTimeMetric" ng-options="metric.id as metric.name for metric in selectTimeMetrics" ng-change="calculateTimeMetric(todo, $index, todo.minCompletionTime, 'minCompletionTimeResult')"></select><br><!-- ng-change="calculateTimeMetric(todo, todo.minCompletionTimeMetric, todo.minCompletionTime, 'minCompletionTimeResult')" -->
+								maxCompletionTime <input type="text" ng-model="todo.maxCompletionTime" size="4"><select ng-model="todo.maxCompletionTimeMetric" ng-options="metric.id as metric.name for metric in selectTimeMetrics" ng-change="calculateTimeMetric(todo, $index, todo.maxCompletionTime, 'maxCompletionTimeResult')"></select> <!-- ng-change="calculateTimeMetric(todo, todo.maxCompletionTimeMetric, todo.maxCompletionTime, 'maxCompletionTimeResult')"-->
+							</div>
+							hasDueDate:<input type="checkbox" ng-model="todo.hasDueDate">
+							<div ng-show="todo.hasDueDate">
+								minDueDate: blah<br>
+								maxDueDate: blah
+							</div>
+						</div>
+					</div>
+				</div>
+			</tab-pane>
+			<tab-pane title="Categories">
+				<div class="row jkSection rnd">
+					<div>
+						<div class="pull-right">
+							New:<input type="checkbox" ng-model="addingNewCategory">
+						</div>
+						<h5>Categories: ({{jk2doCategories.length}} found)</h5>
+					</div>
+					<div id="jk2doNewCategory" class="jkSection rnd" ng-show="addingNewCategory">
+						<h5>New Category:</h5>
+						<form role="form">
+							<div class="form-group">
+								<input type="text" class="form-control" id="newCategoryName" ng-model="newCategory.name" placeholder="Category Name">
+							</div>
+							<div class="form-group">
+								<input type="text" class="form-control" id="newCategoryShorthand" ng-model="newCategory.shorthand" placeholder="shorthand">
+							</div>
+							<a id="jk2doAddCategory" ng-click="addCategory()" class="btn btn-small btn-default pull-right"><i class="glyphicon glyphicon-add"></i>Add</a>
+						</form>
+						<div style="clear:both;"></div>
+					</div>
+					<div class="jk2doItem rnd" ng-repeat="category in jk2doCategories track by category.id">
+						<!--   | orderBy: name -->
+						<div class="pull-right">
+							<div class="pull-right">
+								<a class="jk2doRemove btn btn-sm btn-danger pull-right rnd" ng-click="removeCategory(category)"><i class="glyphicon glyphicon-remove"></i></a>
+							</div>
+							<div class="jk2doEdit rnd pull-right">
+								<i class="glyphicon glyphicon-edit"></i>
+								<input type="checkbox" ng-model="category._jkCfg.editable">
+							</div>
+						</div>
+						<div ng-show="!category._jkCfg.editable">
+							[{{category.shorthand}}] {{category.name}} ({{(jk2doList | filter:{category_id:category.id}).length}} tasks)
+						</div>
+						<div ng-show="category._jkCfg.editable">
+							({{category.id}})<input type="text" ng-model="category.name"> Sh: <input type="text" ng-model="category.shorthand" size="2">
+						</div>
+						<div style="clear:both;"></div>
+					</div>
+				</div>
+			</tab-pane>
+			<tab-pane title="Projects">
+				<div class="row jkSection rnd">
+					<div>
+						<div class="pull-right">
+							New:<input type="checkbox" ng-model="addingNewProject">
+						</div>
+						<h5>Projects: ({{jk2doProjects.length}} found)</h5>
+					</div>
+					<div class="jkSection rnd" ng-show="addingNewProject">
+						<h5>New Project</h5>
+						<form role="form">
+							<div class="form-group">
+								<label for="projName">Name:</label><input type="text" ng-model="newProject.name">
+							</div>	
+							<a id="jk2doAddProject" ng-click="addProject()" class="btn btn-sm btn-default pull-right rnd"><i class="glyphicon glyphicon-add"></i> Add</a>
+						</form>
+						<div style="clear:both;"></div>
+					</div>
+					<div class="jk2doItem rnd" ng-repeat="project in jk2doProjects track by project.id">
+						<div class="pull-right">
+							<div class="pull-right">
+								<a class="jk2doRemove btn btn-sm btn-danger pull-right rnd" ng-click="removeProject(project)"><i class="glyphicon glyphicon-remove"></i></a>
+							</div>
+							<div class="pull-right jk2doEdit rnd">
+								<i class="glyphicon glyphicon-edit"></i>
+								<input type="checkbox" ng-model="project._jkCfg.editable">
+							</div>
+						</div>
+						<div ng-show="!project._jkCfg.editable">
+							[{{project.id}}] {{project.name}} ({{(jk2doList | filter:{project_id:project.id}).length}} tasks)
+						</div>
+						<div ng-show="project._jkCfg.editable">
+							[{{project.id}}] <input type="text" ng-model="project.name">
+						</div>
+						<div style="clear:both;"></div>
+					</div>
+				</div>
+			</tab-pane>
+			<tab-pane title="Alarms">
+				<div class="row jkSection rnd">
+					<div>
+						<div class="pull-right">
+							New:<input type="checkbox" ng-model="addingNewAlarm">
+						</div>
+						<h5>Alarms: ({{jk2doAlarms.length}} found) </h5>
+						<h4>Dev Note: Alarms not working yet...</h4>
+					</div>
+					<div class="jkSection rnd" ng-show="addingNewAlarm">
+						<h5>New Alarm:</h5>
+						<form role="form">
+							<div class="form-group">
+								<label for="projTask">Task:</label><select type="text" id="newAlarmTask" ng-model="newAlarm.task_id" ng-options="todo.id as todo.content for todo in jk2doList"></select> 
+							</div>
+							<div class="form-group">
+								<label for="projDim">DelayInMinutes:</label><input type="number" id="newAlarmDelayInMinutes" ng-model="newAlarm.delayInMinutes"> 
+							</div>
+							<a id="jk2doAddAlarm" ng-click="addAlarm()" class="btn btn-small btn-default pull-right">Add</a>
+						</form>
+						<div style="clear:both;"></div>
+					</div>
+					<div class="jk2doItem rnd" ng-repeat="alarm in jk2doAlarms track by alarm.id">
+						<div class="pull-right">
+							<div class="pull-right rnd">
+								<a id="jk2doRemoveAlarm" ng-click="removeAlarm(alarm)" class="jk2doRemove btn btn-small btn-danger pull-right rnd"><i class="glyphicon glyphicon-remove"></i></a>
+							</div>
+							<div class="pull-right jk2doEdit rnd">
+								<i class="glyphicon glyphicon-edit"></i>
+								<input type="checkbox" ng-model="alarm._jkCfg.editable">
+							</div>
+						</div>
+						<div ng-show="!alarm._jkCfg.editable">
+							TaskId: {{alarm.task_id}} Name: {{alarm.name}}
+							DelayInMin: {{alarm.delayInMinutes}}
+							PeriodInMin: {{alarm.periodInMinutes}} 
+						</div>
+						<div ng-show="alarm._jkCfg.editable">
+							<input type="text" ng-model="alarm.name"><br>
+							Task: <select ng-model="alarm.task_id" ng-options="todo.id as todo.content for todo in jk2doList"></select>
+						</div>
+						<div style="clear:both;"></div>
+					</div>
+				</div>
+			</tab-pane>
+			<tab-pane title="TodoGroups">
+				<div class="row jkSection rnd">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<div>
+							<div class="pull-right">
+								New:<input type="checkbox" ng-model="addingNewTodoGroup">
+							</div>
+							<h5>TodoGroups: ({{jk2doTodoGroups.length}}) found)</h5>
+						</div>
+						<div class="jkSection rnd" ng-show="addingNewTodoGroup">
+							<h5>New TodoGroup</h5>
+							<form role="form">
+								<div class="form-group">
+									<label for="tdgName">Name:</label><input type="text" ng-model="newTodoGroup.name" size="12">
+								</div>
+								<div class="textarea">
+									<textarea ng-model="newTodoGroup.notes" rows="2" cols="40"></textarea>
+								</div>
+								<div class="form-group">
+									Todos: ({{newTodoGroup.todos.length}})
+									<div ng-repeat="todo in jk2doList" ng-click="toggleParent(todo, 'todo', newTodoGroup, 'todoGroup')">
+										<input type="checkbox" ng-checked="newTodoGroup.todos.indexOf(todo.id) !== -1">{{todo.content}}
+									</div>
+								</div>
+								<a ng-click="addTodoGroup()" class="btn btn-small btn-default pull-right"><i class="glyphicon glyphicon-add"></i>Add</a>
+								<!-- <button ng-click="addTodoGroup()">Add</button> -->
+							</form>
+							<div style="clear:both;"></div>
+						</div>
+						<hr>
+						<div class="row jk2doItem rnd" ng-repeat="todoGroup in jk2doTodoGroups" style="float:left;min-height:75px;">
+							<div class="col-md-12 col-sm-12 col-xs-12">
+								<div>
+									<div class="pull-right">
+										<a class="jk2doRemove btn btn-sm btn-danger pull-right rnd" ng-click="removeTodoGroup(todoGroup)"><i class="glyphicon glyphicon-remove"></i></a>
+									</div>
+									<div class="jk2doEdit rnd pull-right">
+										<div style="position:relative;width:100%;height:100%;">
+										<i class="glyphicon glyphicon-edit"></i>
+										<input type="checkbox" ng-model="todoGroup._jkCfg.editable">
+									</div>
+									</div>
+								</div>
+							</div>
+							<div ng-show="!todoGroup._jkCfg.editable" style="clear:both;float:left;" class="col-md-12 col-sm-12 col-xs-12">
+								<div>
+									Name: {{todoGroup.name}} Notes: {{todoGroup.notes}}<br>
+									Todos: ({{todoGroup.todos.length}})
+								</div>
+								<div style="clear:both;">
+									<!-- <div ng-repeat="todoId in todoGroup.todos" style="float:left;border:1px red dashed;padding:3px 3px;margin:3px 3px;">
+										{{jk2doList[ref.todos[todoId]].content}}
+									</div>
+									<hr> -->
+
+									<div ng-repeat="todo in jk2doList | inArray:todoGroup.todos:'id'" style="float:left;border:1px black dashed;margin:5px 5px;padding:4px 4px;">
+										<div ng-show="todo.hasCompletionTime">	{{todo.minCompletionTime}}{{selectTimeMetrics[ref.selectTimeMetrics[todo.minCompletionTimeMetric]].shorthand}} to {{todo.maxCompletionTime}}{{selectTimeMetrics[ref.selectTimeMetrics[todo.maxCompletionTimeMetric]].shorthand}}
+										</div>
+										<div style="clear:both;">
+											{{todo.content}}
+										</div>
+									</div>
+									 
+								</div>
+							</div>
+							<div class="col-md-12 col-sm-12 col-xs-12" ng-show="todoGroup._jkCfg.editable" style="clear:both;float:left;">
+								[{{todoGroup.id}}] <input type="text" ng-model="todoGroup.name" size="12"><br>
+								<textarea ng-model="todoGroup.notes" rows="2" cols="40"></textarea><br>
+								<!-- LastTodoIdCompleted: <select ng-model="todoGroup.lastTodoIdCompleted" ng-options="todo.id as todo.name for todo in todoGroup._jkCfg.todos"></select><br> -->
+								LastGroupComplNotes:<input type="text" size="12" ng-model="todoGroup.lastGroupCompletionNotes"><br>
+								LastGroupComplAt:<input type="text" size="12" ng-model="todoGroup.lastGroupCompletionAt"><br>
+								Todos: ({{todoGroup.todos.length}})<br>
+								<div ng-repeat="todo in jk2doList" ng-click="toggleParent(todo, 'todo', todoGroup, 'todoGroup')">
+										<input type="checkbox" ng-checked="todoGroup.todos.indexOf(todo.id) !== -1">{{todo.content}}
+								</div>
+								
+							</div>
+						</div>
+					</div>
+				</div>
+			</tab-pane>
+			<!-- <tab-pane title="Lang">
+				Active Language: German-English<br>
+				<div style="width:95%;border:1px black solid;margin:3px auto;">
+					Random Word:
+					{{languageReference.de.randomWord}}<br>
+					Reference words:<br>
+					<div ng-repeat="word in languageReference.de.randomWordReference" style="float:left;border:1px blue solid;margin:3px 3px;padding:2px 2px;">
+						<!-!- {{languageReference.de.refs.randomWordReference}} -!->
+						{{word}}
+					</div>
+					
+					<div style="clear:both;">
+						<button ng-click="randomLanguageSelection()">Random</button>
+					</div>
+				</div>
+				<div style="clear:both;"></div>
+				<div style="width:95%;border:1px black solid;margin:3px auto;">
+					<div>
+					Lookup: <input ng-model="languageReference.de.searchForWord" ng-change="findWordInReference()"><br>
+					Result: ({{$scope.languageReference.de.searchWordReference.length}})
+					</div>
+					<div style="clear:both;"></div>
+					<div ng-repeat="word in languageReference.de.searchWordReference" style="float:left;border:1px blue solid;margin:3px 3px;padding:3px 3px;">
+						{{word}}
+					</div>
+				</div>
+				<div style="clear:both;"></div>
+				<div style="width:95%;border:1px black solid;margin:3px auto;padding:3px 3px;">
+					<div ng-repeat="character in languageReference.de.wordByIndexCharacters" style="float:left;padding:3px 3px;margin:3px 3px;border:1px blue solid;">
+						<a ng-click="selectWordByIndex($index)">{{character}} ({{languageReference.de.wordByIndex[$index].length}})</a>
+					</div>
+					<div ng-if="languageReference.de.selectedIndexCharacter !== false" style="border:1px red dashed;margin:2px 2px;padding:2px 2px;">
+						<div ng-repeat="word in languageReference.de.wordByIndex[languageReference.de.selectedIndexCharacter] track by $index" style="width:100%;height:auto;min-height:30px;clear:both;border:1px black solid;">
+							<div style="float:left;">
+								{{word}}
+							</div>
+							<div ng-repeat="refWord in languageReference.de.refs[languageReference.de.selectedIndexCharacter][word] track by $index" style="float:left;margin:0px 2px;padding:2px 2px;border:1px blue solid;">
+								{{refWord}}
+							</div>
+							<div style="clear:both;"></div>
+						</div>
+					</div>
+				</div>
+			</tab-pane> -->
+			<!-- <tab-pane title="Debug"
+				<div class="row jkSection rnd" ng-tab-pane title="Dbg">
+					<div class="col-md-12">
+						<div id="jk2doControls">
+							<hr>
+							<a id="jk2doRemoveAll" ng-click="executeOrder66()" class="btn btn-small btn-default pull-right" ng-show="jk2doList.length > 0">
+								<i class="glyphicon glyphicon-remove"></i>EO66
+							</a>
+						</div>
+					</div>
+				</div>
+			</tab-pane> -->
+		</tab-group>
+	</div>
+	<div class="bottomPanel">
+		<div class="pull-right" style="margin:0px 6px;border:1px black solid;padding:2px 2px;">
+			<button ng-click="about()" class="btn btn-sm">About</button>
+		</div>
+		<div style="float:left;margin:0px 6px;border:1px black solid;padding:2px 2px;" class="text-center">
+			<button ng-click="saveAll()" class="btn btm-sm">Save</button>
+		</div>
+		<div style="float:left;margin:0px 6px;border:1px black solid;padding:2px 2px;" class="text-center">
+			<button ng-click="dbg()" class="btn btn-sm">Debug</button>
+		</div>
+		
+		
+	</div>
+    <script type="text/javascript" src="libs/jquery/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript" src="libs/angular/angular.min.js"></script>
+    <script type="text/javascript" src="libs/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="libs/angular/angular-touch.js"></script>
+	<script type="text/javascript" src="libs/angular/angular-animate.js"></script>
+    <script type="text/javascript" src="lang/de-en.js"></script>
+	<script type="text/javascript" src="app/jk2do.js"></script>
+    <script type="text/javascript" src="app/jk2doCtrl.js"></script>
+    <script type="text/javascript" src="app/jk2doStorage.js"></script>
+    <script type="text/javascript" src="app/jk2doAlarm.js"></script>
+</body>
+</html>

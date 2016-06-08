@@ -1,0 +1,17 @@
+{
+	"manifest_version": 2,
+	"name": "JK2Do",
+	"description": "Simple Angular-based todo list",
+	"short_name": "JK2Do",
+	"version": "0.1",
+	/*"browser_action": {
+		"default_popup": "index.html",
+		"default_icon": "images/2do.png"
+	},*/
+	"app": {
+		"background": {
+			"scripts": ["app/jkBackground.js"]
+		}
+	},
+	"permissions": [ "storage", "unlimitedStorage",	"alarms", "notifications" ]
+}
