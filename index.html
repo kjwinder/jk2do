@@ -8,7 +8,7 @@
 <body ng-controller="jk2doCtrl">
 	<div class="container-fluid jkPage">
 		<tab-group>
-			<tab-pane title="Tasks">
+			<tab-pane name="Tasks">
 				<div class="jkSection rnd" id="jk2doList">
 					<div class="row">
 						<div class="col-md-12 col-sm-12 col-xs-12">
@@ -99,8 +99,8 @@
 						<div ng-show="!todo._jkCfg.editable">
 							<input type="checkbox" ng-model="todo.completed" ng-click="toggleCompleted()">
 							<span class="jk2doContent">{{todo.content}}</span>
-							<span ng-show="todo.category_id">[{{jk2doCategories[ref.categories[todo.category_id]].shorthand}}]</span>
-							<span ng-show="todo.project_id">{{jk2doProjects[ref.projects[todo.project_id]].name}}</span>
+							<span ng-show="todo.category_id">[{{(jk2doCategories | filter:{id:todo.category_id})[0].shorthand}}]</span>
+							<span ng-show="todo.project_id">{{(jk2doProjects | filter:{id:todo.project_id})[0].name}}</span>
 							<span ng-show="todo.isRecurringTask">
 								<i class="glyphicon glyphicon-repeat"></i>
 							</span>
@@ -141,7 +141,7 @@
 					</div>
 				</div>
 			</tab-pane>
-			<tab-pane title="Categories">
+			<tab-pane name="Categories">
 				<div class="row jkSection rnd">
 					<div>
 						<div class="pull-right">
@@ -183,7 +183,7 @@
 					</div>
 				</div>
 			</tab-pane>
-			<tab-pane title="Projects">
+			<tab-pane name="Projects">
 				<div class="row jkSection rnd">
 					<div>
 						<div class="pull-right">
@@ -221,7 +221,7 @@
 					</div>
 				</div>
 			</tab-pane>
-			<tab-pane title="Alarms">
+			<tab-pane name="Alarms">
 				<div class="row jkSection rnd">
 					<div>
 						<div class="pull-right">
@@ -266,7 +266,7 @@
 					</div>
 				</div>
 			</tab-pane>
-			<tab-pane title="TodoGroups">
+			<tab-pane name="TodoGroups">
 				<div class="row jkSection rnd">
 					<div class="col-md-12 col-sm-12 col-xs-12">
 						<div>
@@ -347,7 +347,31 @@
 					</div>
 				</div>
 			</tab-pane>
-			<!-- <tab-pane title="Lang">
+			<tab-pane name="Calc">
+				Calculations and such<br>
+				<h4>Dev Note - Calcs not working yet...</h4>
+				<select ng-options="calc as calc.name for calc in calcs" ng-model="selectedCalc"></select>
+				<div ng-show="selectedCalc" ng-init="thisCalc = { _data: [] }">
+					Main:<br>
+					<div ng-repeat="mainAttr in selectedCalc.cfg.attrs | filter: { type:'main' }">
+						<div ng-repeat="(key, varObj) in mainAttr.vars" ng-init="thisCalc[varObj.name] = 1">
+							{{key}}: {{varObj.name}} - {{varObj.required}} - {{varObj.type}}
+							<input ng-model="varObj.val" type="number" step="0.01" />
+							thisClc: <input ng-model="thisCalc[varObj.name]" type="number" step="0.01" />
+						</div>
+					</div>
+					<br>
+					Repeating:<br>
+					<div ng-repeat="attr in selectedCalc.cfg.attrs | filter: { type:'repeating' }">
+						<div ng-repeat="(key, varObj) in attr.vars">
+							{{key}}: {{varObj.name}} - {{varObj.required}} - {{varObj.type}}
+							<input ng-model="varObj.val" type="number" step="0.1" />
+						</div>
+					</div>
+					Result: <div>{{thisCalc}}</div>
+				</div>
+			</tab-pane>
+			<!-- <tab-pane name="Lang">
 				Active Language: German-English<br>
 				<div style="width:95%;border:1px black solid;margin:3px auto;">
 					Random Word:
@@ -391,7 +415,7 @@
 					</div>
 				</div>
 			</tab-pane> -->
-			<!-- <tab-pane title="Debug"
+			<!-- <tab-pane name="Debug"
 				<div class="row jkSection rnd" ng-tab-pane title="Dbg">
 					<div class="col-md-12">
 						<div id="jk2doControls">
@@ -404,6 +428,14 @@
 				</div>
 			</tab-pane> -->
 		</tab-group>
+		<div class="about" style="display:none;width:100%;height:50%;z-index:9999;position:fixed;top:50px;left:0px;padding:20px 30px;background:#FFFFFF;">
+			<h4>About JK2DO</h4>
+			<p>This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
+			<p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</p>
+			<p>You should have received a copy of the GNU General Public License along with this program.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses</a>.</p>
+			<p>Copyright (&copy;) 2016 Kyle J Winder</p>
+			<button ng-click="aboutFace()">OK</button>
+		</div>
 	</div>
 	<div class="bottomPanel">
 		<div class="pull-right" style="margin:0px 6px;border:1px black solid;padding:2px 2px;">
@@ -415,15 +447,13 @@
 		<div style="float:left;margin:0px 6px;border:1px black solid;padding:2px 2px;" class="text-center">
 			<button ng-click="dbg()" class="btn btn-sm">Debug</button>
 		</div>
-		
-		
 	</div>
     <script type="text/javascript" src="libs/jquery/jquery-2.1.3.min.js"></script>
     <script type="text/javascript" src="libs/angular/angular.min.js"></script>
     <script type="text/javascript" src="libs/bootstrap/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="libs/angular/angular-touch.js"></script>
 	<script type="text/javascript" src="libs/angular/angular-animate.js"></script>
-    <script type="text/javascript" src="lang/de-en.js"></script>
+    <!-- TODO: LanguageFix <script type="text/javascript" src="lang/de-en.js"></script> -->
 	<script type="text/javascript" src="app/jk2do.js"></script>
     <script type="text/javascript" src="app/jk2doCtrl.js"></script>
     <script type="text/javascript" src="app/jk2doStorage.js"></script>

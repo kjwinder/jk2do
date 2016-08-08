@@ -1,0 +1,63 @@
+-- Add new Object type
+	++ Project :(160207?)
+
+(++ Expand Object parameters
+	-- ::Task::
+		-- isRecurringTask
+		-- recurrenceType[]
+			-- none, scheduled, range, any
+		-- hasTimeToCompletion
+		-- min/maxTimeToCompletion
+		-- hasDueDate
+		-- min/maxDueDate
+):(160209)	
+		
+	
+-- Fix add new Object
+	-+ Task
+	-+ Category
+	-+ Alarm
+	-- Project
+
+-- Fix <select> loading correct saved parameters
+	++ Task.recurrenceType (typo)
+	
+-- Match parent-child objects
+	
+-- Make sure extra .push()es are not being made to Task,Cat,Ala,Proj arrays
+	-- $watch changes good enough?
+	
+-- Build References to objects (160314)
+	++ $scope.ref
+	
+++ $filter.inArray (160316)
+	-- Sub-lists without excessive cross-checking, should not need $scope.ref necessarily either
+	
+-- "Archive" existing objects
+	-- TodoGroups: on completion of all todos, archive select properties as a history of completions
+	
+-- Word Of The Day
+	-- Multi-language support
+	
+++ .directive('tabGroup')
+++ .directive('tabPane')
+
+-- Change jkStorage to segmented storage
+	-- jk2do_cfg
+		-- lastId { task: 12, project: 4, ... } for index management
+		-- storageContainers { Tasks: 1, Projects: 1,...} -> loads 'jk2do_$key'
+	-- jk2t
+	-- jk2p
+	-- jk2c
+	-- jk2a
+	-- jk2tg
+	-- NewFunctions:
+		-- Ctrl.indexAudit(objects, objectNames, uniqueFields, isNumericFields)
+		-- buildNewIndex(objs)
+		++ Storage.duplicateIndexCheck(objs, uniqueField, isNumericField)
+		-- checkIndices(objs, uniqueFields, isNumericFields)
+			-> duplicateIndexCheck
+				-> buildNewIndex on discrepancy ( return: { errorObjs: [] } || false )
+	
+-- Fix duplicate IDs
+	-- Maintain index keys, last_insert_id in jk2do_cfg

@@ -9,7 +9,7 @@
 				<a href="" ng-click="select(pane)">{{pane.title}}</a>
 			</li>
 		</ul> -->
-		<button class="btn btn-sm text-center pull-left" style="margin:2px 4px; background:#CCC;" ng-repeat="pane in panes" ng-click="select(pane)">{{pane.title}}</button>
+		<button class="btn btn-sm text-center pull-left" style="margin:2px 4px; background:#CCC;" ng-repeat="pane in panes" ng-click="select(pane)">{{pane.name}}</button>
 	</div>
 	<div class="tabContent" ng-transclude></div>
 </div>
