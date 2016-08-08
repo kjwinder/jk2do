@@ -1,24 +1,3 @@
-/*
-***
-***
-Copyright (C) 2016 Kyle J Winder
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***
-***
-*/
-
 angular.module('jk2do').controller('jk2doCtrl', function($scope, jk2doStorage, jk2doAlarm) {
 	$scope.jk2doStorage = jk2doStorage; //Storage 
 	$scope.jk2doAlarm = jk2doAlarm;
@@ -83,11 +62,11 @@ angular.module('jk2do').controller('jk2doCtrl', function($scope, jk2doStorage, j
 
 	/* Language/i18n support */
 	$scope.languages = [
-		/* DISABLED UNTIL A BETTER DICTIONARY FILE IS AVAILABLE{name:"Deutsch",dict:"/lang/en-de.txt",shorthand:"de"}*/
+		{name:"Deutsch",dict:"/lang/en-de.txt",shorthand:"de"}
 	];
 	
 	$scope.languageReference = {
-		/*REMOVED UNTIL LANGUAGE FIX 20160707"de": {
+		"de": {
 			"refs": langRef_de_en, //Key-value JSON pairs for each word entry
 			"randomWord": "flight",
 			"randomLetterIndex": 5,
@@ -95,48 +74,62 @@ angular.module('jk2do').controller('jk2doCtrl', function($scope, jk2doStorage, j
 			"searchForWord": "",
 			"searchWord": false,
 			"searchWordReference": false
-		}*/
+		}
 	};
 	
 	/* End Language/i18n support */
 	
-	/* Calculations and other QOL Stuff */
-	$scope.calcs = [
-		{"id":1,"name":"Baker's Ratio",
-			"cfg": {	
-				"is_object":true,
-				"attrs":[
-					{	"type":"main",
-						"vars":[
-							{"name":"ratio","required":true,"type":"float"}
-						]
-					},
-					{	"type":"repeating",
-						"vars":[
-							{"name":"a", "required":true, "type":"float"},
-							{"name":"b","required":true,"type":"result"}
-						]
-					}
-			
-				],
-				"formula":"ratio * a",
-				"result":"b"
-			}
-					
-		},
-		{"id":1,"name":"Metric to Imperial","attrs":[ ]}
-	];
+	$scope.jk2doStorage.findAll(function(tasks, categories, alarms, projects, todoGroups) { 	//Pull data from the Storage service
+		if (angular.isArray(tasks)) {
+			$scope.jk2doList = tasks;
+		} else {
+			console.log('TASKS NOT ARRAY');
+			$scope.jk2doList = [];
+		}
+		if (angular.isArray(categories)) {
+			$scope.jk2doCategories = categories;
+		} else {
+			console.log('CATEGORIES NOT ARRAY');
+			$scope.k2doCategories = [];
+		}
+		if (angular.isArray(alarms)) {
+			$scope.jk2doAlarms = alarms;
+		} else {
+			console.log('ALARMS NOT ARRAY');
+			$scope.jk2doAlarms = [];
+		}
+		if (angular.isArray(projects)) {
+			$scope.jk2doProjects = projects;
+		} else {
+			console.log('PROJECTS NOT ARRAY');
+			$scope.jk2doProjects = [];
+		}
+		$scope.jk2doTodoGroups = todoGroups;
+		console.log('Ctrl.jkStorage.findAll alarms:', alarms);
+		console.log('Ctrl.jkStorage.findAll tasks:', tasks);
+		console.log('Ctrl.jkStorage.findAll categories:', categories);
+		console.log('Ctrl.jkStorage.findAll todoGroups:', todoGroups);
+		console.log('Pre-apply on jk2doStorage.findAll');
+		
+		$scope.buildReferences(tasks, 'todos', 'id');
+		$scope.buildReferences(alarms, 'alarms', 'id');
+		$scope.buildReferences(categories, 'categories', 'id');
+		$scope.buildReferences(projects, 'projects', 'id');
+		$scope.buildReferences(todoGroups, 'todoGroups', 'id');
+		
+		$scope.buildReferences($scope.selectTimeMetrics, 'selectTimeMetrics', 'id');
+		
+		/* Disable Language tab for now
+		//Language - build reference for random word selection
+		$scope.buildLanguageReference($scope.languageReference['de']);
+		*/
+		$scope.$apply(); //Show loaded data in View
+		
+		console.log('... Data loaded via jk2doStorage.findAll!');
+	});
+
 	
-	$scope.calcResults = {};
-	
-	/* End Calculations and other QOL Stuff */
-	
-	/* Disable Language tab for now
-	//Language - build reference for random word selection
-	$scope.buildLanguageReference($scope.languageReference['de']);
-	*/
-	
-	$scope.$watch('jk2doStorage.tasks', function() { //Track Tasks data
+	$scope.$watch('jk2doStorage.data', function() { //Track Tasks data
 		$scope.jk2doList = $scope.jk2doStorage.tasks;
 		console.log('Tasks watch...' + new Date().toTimeString());
 	});
@@ -199,7 +192,7 @@ angular.module('jk2do').controller('jk2doCtrl', function($scope, jk2doStorage, j
 	}
 	
 	$scope.saveAll = function() {
-		jk2doStorage.saveAll();
+		jk2doStorage.sync();
 	}
 	
 	$scope.addCategory = function() {
@@ -400,50 +393,6 @@ angular.module('jk2do').controller('jk2doCtrl', function($scope, jk2doStorage, j
 		}
 	}
 	
-	/*|REFAC:jk2doStorage|$scope.indexAudit = function(objects, objectNames, uniqueFields, isNumericFields) {
-		if (angular.isArray(objects) && angular.isArray(uniqueFields) && angular.isArray(isNumericFields) && angular.isArray(objectNames)) {
-			var ol = objects.length, on = objectNames.length, ul = uniqueFields.length, il = isNumericFields.length; 
-			if (ol === ul && ol === il && ol === on) {
-				//Begin audit
-				var audit = {};
-				angular.forEach(objects, function(objs, i) {
-					var name = objectNames[i];
-					var uniqF = uniqueFields[i];
-					var isNumF = isNumericFields[i];
-					var keys = [];
-					console.log('audit i='+i+', obj:', obj);
-					//audit[name] = { 'first': false, 'last': false, 'all': [] };
-					/*angular.forEach(objs, function(obj, j) {
-						console.log('j='+j+', obj:', obj);
-						var thisAudit = $scope.jk2doStorage.duplicateIndexCheck(objs, uniqF, isNumF);
-					});*!/
-					var thisAudit = $scope.jk2doStorage.duplicateIndexCheck(objs, uniqF, isNumF);
-					audit['name'] = thisAudit;
-				});
-				console.log('audit:', audit);
-			} else {
-				//Data length mismatch
-			}
-		} else {
-			
-		}
-	};*/
-	
-	$scope.jk2doStorage.findAll();
-	
-	$scope.buildReferences($scope.selectTimeMetrics, 'selectTimeMetrics', 'id');
-	
-	$scope.about = function() {
-		//Display App/GPL Software License info
-		console.log('about clicked');
-		var e = angular.element(document).find('div.about');
-		e.css('display','block');
-	}
-	
-	$scope.aboutFace = function() {
-		angular.element(document).find('div.about').css("display","none");
-	}
-	
 	$scope.dbg = function() {
 		$scope.jk2doStorage.dbg();
 	}
@@ -506,8 +455,7 @@ angular.module('jk2do').directive('tabPane', function() {
 		restrict: 'EA',
 		transclude: true,
 		scope: {
-			title: '@',
-			name: '@'
+			title: '@'
 		},
 		link: function(scope, element, attrs, tabsGroupCtrl) {
 			tabsGroupCtrl.addPane(scope);
